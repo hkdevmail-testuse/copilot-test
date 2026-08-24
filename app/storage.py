@@ -1,13 +1,11 @@
-import os
 from pathlib import Path
-from typing import BinaryIO
 
-from app.config import get_storage_root
+from app.config import get_static_root
 
 
 class LocalObjectStore:
     def __init__(self, root: Path | None = None) -> None:
-        self.root = root or get_storage_root()
+        self.root = root or get_static_root()
         self.root.mkdir(parents=True, exist_ok=True)
 
     def save_processed_images(self, user_id: str, main_image_path: Path, thumb_image_path: Path) -> tuple[str, str]:

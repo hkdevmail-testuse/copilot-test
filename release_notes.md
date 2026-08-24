@@ -1,21 +1,33 @@
 # Release Notes
 
-## Overview
-This change adds a root-level `README.md` for the repository and removes the outdated `test_README.md` file. The new documentation clarifies how to run the prototype locally and how to execute tests.
+## Release Overview
+This release delivers a local FastAPI prototype for user profile management: name, phone, and avatar updates with optimistic locking.
+
+## Highlights
+- Profile page and REST API with SQLite storage.
+- Avatar processing to 1024px and 128px JPEGs.
+- Pytest suite for the main profile flows.
 
 ## New Features
-- Added `README.md` with project description, local setup, test commands, and prototype notes.
+- GET/PUT user profile endpoints with `version` conflict handling (`409`).
+- Header-based local auth (`x-user-id`, `x-role`).
+- `python run.py` to start the server on 127.0.0.1:8000.
 
 ## Improvements
-- Replaced legacy documentation with a consolidated root README.
-- Clarified repository onboarding and execution instructions.
+- Cursor-oriented project layout (`.cursor/agents`, `.cursor/rules`, `AGENTS.md`).
 
 ## Bug Fixes
-- None.
+- Not available
 
 ## Breaking Changes
-- None.
+- None identified for this prototype.
+
+## Testing
+- `pytest -q` (caller reported passing).
 
 ## Known Issues
-- `pytest` succeeded, but the existing FastAPI app emits deprecation warnings for `on_event` event handlers. This is a framework lifecycle warning and does not block current test execution.
-- The test suite also surfaces a Starlette deprecation warning recommending `httpx2` for `TestClient` usage.
+- FastAPI/Starlette may emit lifecycle or TestClient deprecation warnings.
+
+## Deployment Notes
+- Install with `pip install -r requirements.txt`.
+- Start with `python run.py`. Do not use this header-auth stub in production.

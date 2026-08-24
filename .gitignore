@@ -1,1 +1,11 @@
 .vscode/
+.github/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.db
+storage/
+static/users/
+.cursor/debug*

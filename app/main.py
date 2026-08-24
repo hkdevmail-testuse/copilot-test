@@ -1,19 +1,30 @@
 import re
 import tempfile
+from contextlib import asynccontextmanager
 from io import BytesIO
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, File, Form, Header, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
-from fastapi import FastAPI
 
 from app.config import get_static_root
 from app.db import get_connection, init_db, get_profile, phone_exists, update_profile
 from app.storage import LocalObjectStore
 
-app = FastAPI(title="User Profile Management")
+STATIC_ROOT = get_static_root()
+STATIC_ROOT.mkdir(parents=True, exist_ok=True)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="User Profile Management", lifespan=lifespan)
 
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
@@ -36,11 +47,6 @@ def get_current_user(
     if not x_user_id or not x_role:
         raise HTTPException(status_code=401, detail="Authentication required")
     return CurrentUser(user_id=x_user_id, role=x_role.lower())
-
-
-@app.on_event("startup")
-def startup() -> None:
-    init_db()
 
 
 def _build_error_response(errors: dict[str, str], status_code: int = 422) -> JSONResponse:
@@ -92,7 +98,7 @@ def _process_image(image_bytes: bytes, user_id: str) -> tuple[str | None, str | 
             main.save(main_path, format="JPEG", quality=92)
             thumb.save(thumb_path, format="JPEG", quality=85)
             key_main, key_thumb = store.save_processed_images(user_id, main_path, thumb_path)
-            return key_main, key_thumb, f"/static/{user_id}/avatar-1024.jpg"
+            return key_main, key_thumb, f"/static/{user_id}/avatar-1024.jpg?v={user_id}"
     except (UnidentifiedImageError, OSError):
         raise ValueError("Unsupported or corrupted image")
 
@@ -189,3 +195,14 @@ async def update_profile_endpoint(
             raise
 
         return {"profile": updated_profile}
+
+
+@app.get("/")
+def index() -> FileResponse:
+    page = STATIC_ROOT / "index.html"
+    if not page.exists():
+        raise HTTPException(status_code=404, detail="Profile page is missing")
+    return FileResponse(page)
+
+
+app.mount("/static", StaticFiles(directory=str(STATIC_ROOT)), name="static")

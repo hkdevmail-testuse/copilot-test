@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User Profile</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Segoe UI, system-ui, sans-serif;
+      }
+      body {
+        max-width: 32rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      form,
+      .auth {
+        display: grid;
+        gap: 0.75rem;
+      }
+      label {
+        display: grid;
+        gap: 0.25rem;
+      }
+      input,
+      button,
+      select {
+        font: inherit;
+        padding: 0.5rem;
+      }
+      img {
+        width: 8rem;
+        height: 8rem;
+        object-fit: cover;
+        border-radius: 50%;
+        background: #1f2937;
+      }
+      .status {
+        min-height: 1.5rem;
+      }
+      .error {
+        color: #b91c1c;
+      }
+      .ok {
+        color: #047857;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>User Profile</h1>
+    <section class="auth">
+      <label>
+        User ID
+        <input id="userId" value="user-1" autocomplete="username" />
+      </label>
+      <label>
+        Role
+        <select id="role">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+          <option value="support">support</option>
+        </select>
+      </label>
+      <button type="button" id="load">Load profile</button>
+    </section>
+    <p id="status" class="status" role="status"></p>
+    <form id="profileForm">
+      <img id="avatar" alt="Profile picture" src="/static/default-avatar.svg" />
+      <label>
+        Email
+        <input id="email" readonly />
+      </label>
+      <label>
+        First name
+        <input id="firstName" name="first_name" required />
+      </label>
+      <label>
+        Last name
+        <input id="lastName" name="last_name" required />
+      </label>
+      <label>
+        Phone
+        <input id="phone" name="phone" required inputmode="numeric" />
+      </label>
+      <label>
+        Profile picture
+        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+      </label>
+      <label>
+        <input id="removeImage" type="checkbox" />
+        Remove profile picture
+      </label>
+      <input id="version" type="hidden" />
+      <button type="submit">Save</button>
+    </form>
+    <script>
+      const statusEl = document.getElementById("status");
+      const headers = () => ({
+        "x-user-id": document.getElementById("userId").value.trim(),
+        "x-role": document.getElementById("role").value,
+      });
+
+      function setStatus(message, ok) {
+        statusEl.textContent = message;
+        statusEl.className = "status " + (ok ? "ok" : "error");
+      }
+
+      function fill(profile) {
+        document.getElementById("email").value = profile.email || "";
+        document.getElementById("firstName").value = profile.first_name || "";
+        document.getElementById("lastName").value = profile.last_name || "";
+        document.getElementById("phone").value = profile.phone || "";
+        document.getElementById("version").value = profile.version || 1;
+        document.getElementById("avatar").src = profile.avatar_url || "/static/default-avatar.svg";
+      }
+
+      async function loadProfile() {
+        const userId = document.getElementById("userId").value.trim();
+        const response = await fetch("/users/" + encodeURIComponent(userId) + "/profile", { headers: headers() });
+        const data = await response.json();
+        if (!response.ok) {
+          setStatus(data.detail || "Could not load profile", false);
+          return;
+        }
+        fill(data.profile);
+        setStatus("Profile loaded", true);
+      }
+
+      document.getElementById("load").addEventListener("click", () => {
+        loadProfile().catch((err) => setStatus(String(err), false));
+      });
+
+      document.getElementById("profileForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const userId = document.getElementById("userId").value.trim();
+        const form = new FormData();
+        form.append("first_name", document.getElementById("firstName").value);
+        form.append("last_name", document.getElementById("lastName").value);
+        form.append("phone", document.getElementById("phone").value);
+        form.append("version", document.getElementById("version").value);
+        const image = document.getElementById("image").files[0];
+        if (image) form.append("image", image);
+        if (document.getElementById("removeImage").checked) form.append("remove_image", "true");
+
+        const response = await fetch("/users/" + encodeURIComponent(userId) + "/profile", {
+          method: "PUT",
+          headers: headers(),
+          body: form,
+        });
+        const data = await response.json();
+        if (response.status === 409) {
+          setStatus("Someone else updated this profile. Reload and try again.", false);
+          return;
+        }
+        if (data.errors) {
+          setStatus(Object.values(data.errors).join(" "), false);
+          return;
+        }
+        if (!response.ok) {
+          setStatus(data.detail || "Save failed", false);
+          return;
+        }
+        fill(data.profile);
+        document.getElementById("image").value = "";
+        document.getElementById("removeImage").checked = false;
+        setStatus("Profile saved", true);
+      });
+
+      loadProfile().catch((err) => setStatus(String(err), false));
+    </script>
+  </body>
+</html>

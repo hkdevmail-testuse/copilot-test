@@ -1,0 +1,51 @@
+User Story: User Profile Management
+
+Story ID: US-1045
+
+Title: Allow users to update their profile information
+
+User Story
+
+As a registered user,
+
+I want to update my personal profile information,
+
+So that my account details remain accurate and up to date.
+
+Description
+
+The application currently allows users to view their profile but does not allow them to edit it. Users should be able to modify editable profile fields from the Profile page.
+
+Acceptance Criteria
+
+Users can edit their first name, last name, phone number, and profile picture.
+
+Email address cannot be changed from the Profile page.
+
+Required fields cannot be left blank.
+
+Phone number must be validated before saving.
+
+Changes should be saved successfully and reflected immediately.
+
+A success message should be displayed after saving.
+
+If validation fails, an appropriate error message should be shown.
+
+Unauthorized users must not be able to edit another user's profile.
+
+Notes
+
+Profile picture size should not exceed 5 MB.
+
+Supported image formats: JPG, PNG, and WebP.
+
+Existing authentication and authorization mechanisms should be reused.
+
+Priority
+
+High
+
+Story Points
+
+5

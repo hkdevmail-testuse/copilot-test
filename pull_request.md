@@ -1,19 +1,31 @@
-# Pull Request: Add project README and remove obsolete documentation
+# Pull Request: User profile management API
 
-## Summary of Changes
-- Added `README.md` at the repository root with project overview, local setup instructions, test instructions, and prototype notes.
-- Removed obsolete `test_README.md` from the base branch.
-- Verified diff between `origin/main` and `origin/pr/add-readme` shows only the addition of `README.md` and the removal of `test_README.md`.
+## Summary
+Adds a FastAPI prototype for updating a registered user's profile (name, phone, avatar) with SQLite persistence, optimistic locking, and a local profile page.
+
+## Changes Made
+- Profile API and UI in `app/`, started with `python run.py`.
+- Tests in `tests/test_main.py` and dependencies in `requirements.txt`.
+- Cursor agents/rules, `AGENTS.md`, and `User_Story_User_Profile_Management.txt`.
+- Replaced `.github/agents/` Copilot files with `.cursor/agents/`.
 
 ## Related Issues
 - Not available
 
-## Testing Performed
-- Executed `pytest -q` from the repository root with `PYTHONPATH=.` to ensure package imports resolved correctly.
-- Result: `8 passed`, `0 failed`, `3 warnings`.
-- Note: warnings are related to FastAPI `on_event` lifecycle deprecation and do not affect the current test outcomes.
+## Test Evidence
+- Caller confirmed the application works and tests passed.
+- Automated command: `pytest -q`.
+
+## Steps to Test
+1. `pip install -r requirements.txt`
+2. `python run.py`
+3. Open http://127.0.0.1:8000 and http://127.0.0.1:8000/docs
+4. Use headers `x-user-id` and `x-role` (`user`, `admin`, or `support`)
+
+## Known Limitations
+- Auth is a local header stub, not a production identity provider.
+- Image processing is synchronous.
 
 ## Additional Notes
-- Source branch: `pr/add-readme`
-- Target branch: `main`
-- No separate regression or functional issue was identified in the current change scope.
+- Target repository: https://github.com/hkdevmail-testuse/agentic-ai-test
+- Base branch: `main`

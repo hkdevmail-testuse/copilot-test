@@ -1,0 +1,11 @@
+---
+description: Always-on project context for Cursor agents
+alwaysApply: true
+---
+
+# Copilot_Task → Cursor project
+
+This is a local FastAPI user-profile API. Start it with `python run.py` after `pip install -r requirements.txt`.
+
+Follow `AGENTS.md`. Do not invent requirements; clarify first. Prefer existing modules over new packages.
+---

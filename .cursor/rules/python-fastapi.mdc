@@ -1,0 +1,16 @@
+---
+description: FastAPI and Python conventions for the profile API
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python / FastAPI
+
+- Keep the API aligned with the user story: first name, last name, phone, and avatar are editable; email is not.
+- Validate input at the HTTP boundary; return field errors as `{"errors": {...}}` with `422`.
+- Enforce ownership: a `user` may only change their own profile; `admin` and `support` may change any profile.
+- Use optimistic locking: compare `version` and return `409` with `{"error": "stale_version"}` on mismatch.
+- Do not hardcode secrets. Local auth stays header-based (`x-user-id`, `x-role`).
+- Persist with SQLite helpers in `app/db.py`; store processed avatars via `LocalObjectStore`.
+- Prefer pytest tests named `test_<module>.py` under `tests/`.
+---
